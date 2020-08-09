@@ -80,18 +80,18 @@ format_error({relup_script_generation_error, Module, Errors}) ->
 
 make_relup(State, Release) ->
     Vsn = rlx_state:upfrom(State),
-    UpFrom =
+    UpFromList =
         case Vsn of
             undefined ->
                 get_last_release(State, Release);
             Vsn ->
                 get_up_release(State, Release, Vsn)
         end,
-    case UpFrom of
+    case UpFromList of
         undefined ->
             ?RLX_ERROR({no_upfrom_release_found, Vsn});
         _ ->
-            make_upfrom_script(State, Release, UpFrom)
+            make_upfrom_script(State, Release, UpFromList)
     end.
 
 get_last_release(State, Release) ->
@@ -100,22 +100,15 @@ get_last_release(State, Release) ->
                                   ec_semver:lte(rlx_release:vsn(R1),
                                                 rlx_release:vsn(R2))
                           end, Releases0),
-    Res = lists:foldl(fun(_Rel, R = {found, _}) ->
-                              R;
-                         (Rel, Prev) ->
-                              case rlx_release:vsn(Rel) == rlx_release:vsn(Release)  of
-                                  true ->
-                                      {found, Prev};
-                                  false ->
-                                      Rel
-                              end
-                      end, undefined, Releases1),
-    case Res of
-        {found, R} ->
-            R;
-        Else ->
-            Else
-    end.
+    ec_cmd_log:info(rlx_state:log(State), "find versions: ~p",
+                    [[rlx_release:vsn(Rel) || Rel <- Releases1]]),
+    {PrevRels, _} = lists:splitwith(
+        fun(Rel) ->
+            rlx_release:vsn(Rel) =/= rlx_release:vsn(Release)
+        end, Releases1),
+    ec_cmd_log:info(rlx_state:log(State), "make relup from versions: ~p",
+                    [[rlx_release:vsn(Rel) || Rel <- PrevRels]]),
+    PrevRels.
 
 get_up_release(State, Release, Vsn) ->
     Name = rlx_release:name(Release),
@@ -126,12 +119,15 @@ get_up_release(State, Release, Vsn) ->
             undefined
     end.
 
-make_upfrom_script(State, Release, UpFrom) ->
+make_upfrom_script(State, Release, UpFromList) ->
     OutputDir = rlx_state:output_dir(State),
     WarningsAsErrors = rlx_state:warnings_as_errors(State),
     Options = [{outdir, OutputDir},
                {path, rlx_util:get_code_paths(Release, OutputDir) ++
-                   rlx_util:get_code_paths(UpFrom, OutputDir)},
+                   lists:foldl(fun(UpF, AccIn) ->
+                       AccIn ++ rlx_util:get_code_paths(UpF, OutputDir)
+                   end, [], UpFromList)
+                },
                silent],
                %% the following block can be uncommented
                %% when systools:make_relup/4 returns
@@ -143,21 +139,21 @@ make_upfrom_script(State, Release, UpFrom) ->
                %%     false -> []
               % end,
     CurrentRel = strip_rel(rlx_release:relfile(Release)),
-    UpFromRel = strip_rel(rlx_release:relfile(UpFrom)),
+    UpFromRels = [strip_rel(rlx_release:relfile(UpF)) || UpF <- UpFromList],
     ec_cmd_log:debug(rlx_state:log(State),
                   "systools:make_relup(~p, ~p, ~p, ~p)",
-                  [CurrentRel, UpFromRel, UpFromRel, Options]),
+                  [CurrentRel, UpFromRels, UpFromRels, Options]),
     case rlx_util:make_script(Options,
                      fun(CorrectOptions) ->
-                             systools:make_relup(CurrentRel, [UpFromRel], [UpFromRel], CorrectOptions)
+                             systools:make_relup(CurrentRel, UpFromRels, UpFromRels, CorrectOptions)
                      end) of
         ok ->
             ec_cmd_log:info(rlx_state:log(State),
                           "relup from ~s to ~s successfully created!",
-                          [UpFromRel, CurrentRel]),
+                          [UpFromRels, UpFromRels]),
             {ok, State};
         error ->
-            ?RLX_ERROR({relup_generation_error, CurrentRel, UpFromRel});
+            ?RLX_ERROR({relup_generation_error, CurrentRel, UpFromRels});
         {ok, RelUp, _, []} ->
             write_relup_file(State, Release, RelUp),
             ec_cmd_log:info(rlx_state:log(State),
