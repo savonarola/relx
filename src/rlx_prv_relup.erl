@@ -141,11 +141,11 @@ make_upfrom_script(State, Release, UpFromList) ->
     CurrentRel = strip_rel(rlx_release:relfile(Release)),
     UpFromRels = [strip_rel(rlx_release:relfile(UpF)) || UpF <- UpFromList],
     ec_cmd_log:debug(rlx_state:log(State),
-                  "systools:make_relup(~p, ~p, ~p, ~p)",
+                  "rlx_systools:mk_relup(~p, ~p, ~p, ~p)",
                   [CurrentRel, UpFromRels, UpFromRels, Options]),
     case rlx_util:make_script(Options,
                      fun(CorrectOptions) ->
-                             systools:make_relup(CurrentRel, UpFromRels, UpFromRels, CorrectOptions)
+                             rlx_systools:mk_relup(CurrentRel, UpFromRels, UpFromRels, CorrectOptions)
                      end) of
         ok ->
             ec_cmd_log:info(rlx_state:log(State),
