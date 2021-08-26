@@ -59,6 +59,7 @@ mkdir_p(Path) ->
     %% that last element. This way we ensure that the dir is created
     %% and not have any worries about path names
     DirName = filename:join([filename:absname(Path), "tmp"]),
+    io:format(user, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxdir=~p\n", [DirName]),
     filelib:ensure_dir(DirName).
 
 %% @doc expand wildcards and names in the given paths
