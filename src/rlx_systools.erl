@@ -568,11 +568,11 @@ print_error(Other) ->
     io:format("Error: ~tp~n", [Other]).
 
 format_error({file_problem, {File, What}}) ->
-    io_lib:format("Could not ~w file ~ts~n", [get_reason(What), File]);
+    io_lib:format("Could not ~w file ~ts~n", [What, File]);
 format_error({no_relup, File, App, Vsn}) ->
     io_lib:format("No release upgrade script entry for ~w-~ts to ~w-~ts "
 		  "in file ~ts~n",
-		  [App#application.name, App#application.vsn, 
+		  [App#application.name, App#application.vsn,
 		   App#application.name, Vsn, File]);
 format_error({missing_sasl,Release}) ->
     io_lib:format("No sasl application in release ~ts, ~ts. "
@@ -603,20 +603,3 @@ format_warning(Prefix, pre_R15_emulator_upgrade) ->
     io_lib:format("~tsUpgrade from an OTP version earlier than R15. New code should be compiled with the old emulator.~n",[Prefix]);
 format_warning(Prefix, What) ->
     io_lib:format("~ts~tp~n",[Prefix, What]).
-
-
-get_reason({error, {open, _, _}}) -> open;
-get_reason({error, {read, _, _}}) -> read;
-get_reason({error, {parse, _, _}}) -> parse;
-get_reason({error, {close, _, _}}) -> close;
-get_reason({error, {open, _}}) -> open;
-get_reason({error, {read, _}}) -> read;
-get_reason({error, {parse, _}}) -> parse;
-get_reason({open, _}) -> open;
-get_reason({read, _}) -> read;
-get_reason({parse, _}) -> parse;
-get_reason({close, _}) -> close;
-get_reason(open) -> open;
-get_reason(read) -> read;
-get_reason(parse) -> parse.
-
