@@ -220,6 +220,7 @@ is_erts_lib(Dir) ->
 
 copy_app_(State, App, AppDir, TargetDir, IncludeSrc) ->
     remove_symlink_or_directory(TargetDir),
+    io:format(user,"deleted ~s~n", [TargetDir]),
     case rlx_app_info:link(App) of
         true ->
             link_directory(AppDir, TargetDir),
@@ -344,6 +345,7 @@ copy_dir(State, App, AppDir, TargetDir, SubDir) ->
 
 %% no files are excluded, just copy the whole dir
 copy_dir(SourceDir, TargetDir, []) ->
+    io:format(user,"copied ~s to ~s~n", [SourceDir, TargetDir]),
      case ec_file:copy(SourceDir, TargetDir, [recursive, {file_info, [mode, time]}]) of
         {error, E} -> {error, E};
         ok ->
