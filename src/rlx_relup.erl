@@ -106,7 +106,7 @@ get_versions_before(Name, Vsn, ReleasesDir) ->
         [] ->
             erlang:error(?RLX_ERROR({no_upfrom_release_found, Vsn}));
         PreVsns ->
-            PreVsns
+            [V || {_, V} <- PreVsns]
     end.
 
 vsn_lte({VsnA, _}, {VsnB, _}) ->

@@ -48,13 +48,14 @@ write_src_file(Dir, Name) ->
     ok = filelib:ensure_dir(Src),
     ok = file:write_file(Src, beam_file_contents("a_real_beam"++Name)).
 
-write_appup_file(AppInfo, DownVsn) ->
+write_appup_file(AppInfo, UpDownVsns) ->
     Dir = rlx_app_info:dir(AppInfo),
     Name = rlx_util:to_string(rlx_app_info:name(AppInfo)),
     Vsn = rlx_app_info:vsn(AppInfo),
     Filename = filename:join([Dir, "ebin", Name ++ ".appup"]),
     ok = filelib:ensure_dir(Filename),
-    ok = rlx_file_utils:write_term(Filename, {Vsn, [{DownVsn, []}], [{DownVsn, []}]}).
+    Instrs = [{V, []} || V <- UpDownVsns],
+    ok = rlx_file_utils:write_term(Filename, {Vsn, Instrs, Instrs}).
 
 write_app_file(Dir, Name, Version, Modules, Deps, LibDeps, OptionalDeps) ->
     Filename = filename:join([Dir, "ebin", Name ++ ".app"]),

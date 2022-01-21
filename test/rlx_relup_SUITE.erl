@@ -36,8 +36,8 @@ make_relup_release(Config) ->
     rlx_test_utils:create_app(LibDir1, "non_goal_1", "0.0.1", [stdlib,kernel], [lib_dep_1]),
     rlx_test_utils:create_app(LibDir1, "non_goal_2", "0.0.1", [stdlib,kernel], []),
 
-    rlx_test_utils:write_appup_file(GA1, "0.0.2"),
-    rlx_test_utils:write_appup_file(GA2, "0.0.2"),
+    rlx_test_utils:write_appup_file(GA1, ["0.0.1", "0.0.2"]),
+    rlx_test_utils:write_appup_file(GA2, ["0.0.1", "0.0.2"]),
 
     RelxConfig = [{release, {foo, "0.0.1"},
                    [sasl,
@@ -74,9 +74,11 @@ make_relup_release(Config) ->
                                      [{root_dir, LibDir1}, {lib_dirs, [LibDir1]},
                                       {output_dir, OutputDir} | RelxConfig]),
 
-    ?assertMatch({ok, [{"0.0.3",
-                        [{"0.0.2",[],[point_of_no_return]}],
-                        [{"0.0.2",[],[point_of_no_return]}]}]},
+    ?assertMatch({ok,[{"0.0.3",
+                        [{"0.0.1",[],[point_of_no_return]},
+                         {"0.0.2",[],[point_of_no_return]}],
+                        [{"0.0.1",[],[point_of_no_return]},
+                         {"0.0.2",[],[point_of_no_return]}]}]},
                  file:consult(filename:join([OutputDir, foo, "releases", "0.0.3", "relup"]))),
 
     [{{foo, "0.0.3"}, Release}] = maps:to_list(rlx_state:realized_releases(State2)),
@@ -104,8 +106,8 @@ make_relup_release2(Config) ->
     rlx_test_utils:create_app(LibDir1, "non_goal_1", "0.0.1", [stdlib,kernel], [lib_dep_1]),
     rlx_test_utils:create_app(LibDir1, "non_goal_2", "0.0.1", [stdlib,kernel], []),
 
-    rlx_test_utils:write_appup_file(GA1, "0.0.1"),
-    rlx_test_utils:write_appup_file(GA2, "0.0.1"),
+    rlx_test_utils:write_appup_file(GA1, ["0.0.1"]),
+    rlx_test_utils:write_appup_file(GA2, ["0.0.1"]),
 
     RelxConfig = [{release, {foo, "0.0.1"},
                    [sasl,
@@ -165,8 +167,8 @@ no_upfrom_release(Config) ->
     rlx_test_utils:create_app(LibDir1, "non_goal_1", "0.0.1", [stdlib,kernel], [lib_dep_1]),
     rlx_test_utils:create_app(LibDir1, "non_goal_2", "0.0.1", [stdlib,kernel], []),
 
-    rlx_test_utils:write_appup_file(GA1, "0.0.2"),
-    rlx_test_utils:write_appup_file(GA2, "0.0.2"),
+    rlx_test_utils:write_appup_file(GA1, ["0.0.2"]),
+    rlx_test_utils:write_appup_file(GA2, ["0.0.2"]),
 
     RelxConfig = [{release, {foo, "0.0.1"},
                    [sasl,
