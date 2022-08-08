@@ -436,7 +436,7 @@ get_release(File, Path, ModTestP) ->
     get_release(File, Path, ModTestP, false).
 
 get_release(File, Path, ModTestP, Machine) ->
-    ?log_debug("rlx_systools_make:get_release(~p, ~p, ~p, ~p)", [File, Path, ModTestP, Machine]),
+    ?log_debug("rlx_systools_make:get_release(~n~p,~n~p,~n~p,~n~p)", [File, Path, ModTestP, Machine]),
     case catch get_release1(File, Path, ModTestP, Machine) of
 	{error, Error} ->
 	    {error, ?MODULE, Error};
@@ -821,6 +821,7 @@ check_item(_, Item) ->
 %% in another application.
 
 check_applications(Appls) ->
+    ?log_debug("rlx_systools_make:check_applications(~n~p)", [Appls]),
     undef_appls(Appls),
     dupl_regs(Appls),
     %% Make a list Incs = [{Name,App,AppVsn,Dir}]
