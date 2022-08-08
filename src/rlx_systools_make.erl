@@ -630,6 +630,7 @@ read_application(Name, Vsn, [Dir|Path], Incls, Found, FirstError) ->
 		{error, {no_valid_version, {Vsn, _OtherVsn}}} ->
 			    read_application(Name, Vsn, Path, Incls, true, FirstError);
 		Res ->
+            ?log_debug("rlx_systools_make:read_application {~p, ~p},~ndir: ~p", [Name, Vsn, Dir]),
 		    Res
 	    end;
 	{error, {parse, _File, {Line, _Mod, Err}}} when FirstError == no_fault ->
