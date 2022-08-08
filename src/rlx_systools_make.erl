@@ -19,6 +19,7 @@
 %%
 -module(rlx_systools_make).
 
+-include("rlx_log.hrl").
 %% Purpose : Create start script. RelName.rel --> RelName.{script,boot}.
 %%           and create a tar file of a release (RelName.tar.gz)
 
@@ -435,6 +436,7 @@ get_release(File, Path, ModTestP) ->
     get_release(File, Path, ModTestP, false).
 
 get_release(File, Path, ModTestP, Machine) ->
+    ?log_debug("rlx_systools_make:get_release(~p, ~p, ~p, ~p)", [File, Path, ModTestP, Machine]),
     case catch get_release1(File, Path, ModTestP, Machine) of
 	{error, Error} ->
 	    {error, ?MODULE, Error};
